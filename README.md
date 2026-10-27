@@ -110,7 +110,12 @@ in `src/` to its newest upstream release tag:
 
 If anything changed, it pushes the branch `deps/update`, opens (or
 refreshes) a pull request listing the new versions and the next release tag,
-and starts CI on it.  Nothing is merged or released automatically.
+asks `heisencoder` to review it (and assigns it to them), and approves the
+PR's CI and Python checks, which otherwise wait for approval because the
+workflow opened the PR.  Nothing is merged or released automatically.
+Opening the PR needs the repository setting "Allow GitHub Actions to create
+and approve pull requests" (Settings > Actions > General > Workflow
+permissions).
 
 For Hyprland it also records upstream's release branch in `.gitmodules` (see
 "Compiler and clean source").
