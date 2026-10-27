@@ -26,8 +26,11 @@ jobs:
   update:
     runs-on: ubuntu-26.04
     steps:
+      # Always build the update on main, even when started from another
+      # branch (say, to try out a change to this workflow).
       - uses: actions/checkout@v7
         with:
+          ref: main
           submodules: recursive
 
       # Once someone has pushed their own commits to the update branch (say,
@@ -63,20 +66,24 @@ jobs:
           git add src .gitmodules
           git commit -q -F "$OUT/commit.txt"
 
-          # Skip the push (and a needless CI run) if the branch already has
-          # exactly these versions.
-          if git fetch -q origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2>/dev/null &&
+          # Skip the push (and a needless CI run) if the open PR already has
+          # exactly these versions.  Without an open PR, push and open one even
+          # if the branch is current: an earlier run may have pushed it and
+          # then failed to open the PR.
+          if [ -n "$PR" ] &&
+            git fetch -q origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" 2>/dev/null &&
             git diff --quiet "origin/$BRANCH" HEAD; then
-            echo "The update PR is already up to date"
+            echo "PR #$PR is already up to date"
             exit 0
           fi
           git push -f origin "$BRANCH"
 
           if [ -n "$PR" ]; then
             gh pr edit "$PR" --title "$(cat "$OUT/title.txt")" --body-file "$OUT/summary.md"
-          else
-            gh pr create --base main --head "$BRANCH" \
-              --title "$(cat "$OUT/title.txt")" --body-file "$OUT/summary.md"
+          elif ! gh pr create --base main --head "$BRANCH" \
+              --title "$(cat "$OUT/title.txt")" --body-file "$OUT/summary.md"; then
+            echo "::error::Couldn't open the PR.  If GitHub Actions isn't permitted to create pull requests, allow it in Settings > Actions > General > Workflow permissions."
+            exit 1
           fi
 
           # Pushes made with the workflow's own token don't trigger other
