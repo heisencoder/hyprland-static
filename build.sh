@@ -125,6 +125,9 @@ step_wayland_protocols() {
   meson install -C "$BUILD/wayland-protocols"
 }
 
+# Hyprland needs a newer hyprland-protocols than Ubuntu 26.04 has (0.7.0).
+step_hyprland_protocols() { cmake_lib hyprland-protocols; }
+
 step_glaze() {
   cmake_lib glaze -Dglaze_DEVELOPER_MODE=OFF \
     -Dglaze_BUILD_EXAMPLES=OFF -Dglaze_ENABLE_FUZZING=OFF
@@ -211,12 +214,19 @@ step_hyprland() {
 }
 
 # Session launcher and login-screen entry; drop what a static build can't
-# use (plugin headers and hyprpm, which builds plugins against them).
+# use (plugin headers and hyprpm, which builds plugins against them).  Move
+# the systemd user unit that Hyprland starts (hyprland-session.target) to
+# where systemd looks for it.
 step_extras() {
   local opt=$STAGE$FINAL_PREFIX
   install -D -m 755 "$TOP/packaging/hyprland-static-session" "$opt/bin/hyprland-static-session"
   install -D -m 644 "$TOP/packaging/hyprland-static.desktop" \
     "$STAGE/usr/share/wayland-sessions/hyprland-static.desktop"
+  if [ -d "$opt/lib/systemd" ]; then
+    mkdir -p "$STAGE/usr/lib"
+    mv "$opt/lib/systemd" "$STAGE/usr/lib/systemd"
+    rmdir --ignore-fail-on-non-empty "$opt/lib"
+  fi
   rm -rf "$opt/include" "$opt/share/pkgconfig" "$opt/share/wayland-sessions" \
     "$opt/bin/hyprpm" "$opt/share/bash-completion/completions/hyprpm" \
     "$opt/share/fish/vendor_completions.d/hyprpm.fish" "$opt/share/zsh/site-functions/_hyprpm"
@@ -269,7 +279,7 @@ step_test_stage() {
       return 1
     fi
   done
-  "$bin/Hyprland" --verify-config -c "$TOP/packaging/test.conf" | tail -1 | grep -q "config ok"
+  "$bin/Hyprland" --verify-config -c "$TOP/packaging/test.lua" | tail -1 | grep -q "config ok"
   rm -rf "$XDG_RUNTIME_DIR"
 }
 
@@ -314,8 +324,8 @@ step_notes() {
   (cd "$TOP" && DEB_REVISION=$DEB_REVISION python3 -m scripts.release_notes --out "$OUT/release-notes.md")
 }
 
-BUILD_STEPS=(wayland_protocols glaze hyprwayland_scanner hyprutils hyprlang hyprwire
-             hyprgraphics hyprcursor aquamarine hyprland extras)
+BUILD_STEPS=(wayland_protocols hyprland_protocols glaze hyprwayland_scanner hyprutils
+             hyprlang hyprwire hyprgraphics hyprcursor aquamarine hyprland extras)
 TEST_STEPS=(test_stage)
 [ "$WITH_TESTS" = 1 ] && TEST_STEPS+=(test_libs test_hyprland)
 ALL=("${BUILD_STEPS[@]}" "${TEST_STEPS[@]}" package notes)

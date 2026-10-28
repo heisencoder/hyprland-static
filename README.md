@@ -79,6 +79,14 @@ list them too.
   `wl_*_interface` / `xdg_*_interface` from the same XML.  build.sh makes
   aquamarine's copies local with objcopy (with shared libraries, Hyprland's
   copies win at runtime anyway).
+- **systemd user unit:** Hyprland starts `hyprland-session.target` when it
+  starts, but installs it under its prefix
+  (`/opt/hyprland-static/lib/systemd/user`), where systemd doesn't look.
+  build.sh moves it to `/usr/lib/systemd/user`.  Ubuntu 26.04's hyprland
+  package doesn't ship one, so they don't conflict.
+
+hyprland-protocols is built from `src/` too: Hyprland needs a newer one
+than Ubuntu 26.04's (0.7.0).
 
 ## Tests
 
@@ -90,7 +98,7 @@ list them too.
 - checks on the staged binaries: version and release tag, `clean` source,
   the release branch (if recorded), no dynamically linked Hyprland
   libraries, nothing missing, and `Hyprland --verify-config` on
-  `packaging/test.conf`.
+  `packaging/test.lua`.
 
 Skipped, because build machines lack what they need: Hyprland's full
 compositor tests (`hyprtester`, a GPU), hyprcursor's tests (an installed
