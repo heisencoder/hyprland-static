@@ -225,8 +225,9 @@ step_extras() {
   if [ -d "$opt/lib/systemd" ]; then
     mkdir -p "$STAGE/usr/lib"
     mv "$opt/lib/systemd" "$STAGE/usr/lib/systemd"
-    rmdir "$opt/lib"
   fi
+  # Nothing else belongs there; fail if a new release installs something.
+  [ ! -e "$opt/lib" ] || rmdir "$opt/lib"
   rm -rf "$opt/include" "$opt/share/pkgconfig" "$opt/share/wayland-sessions" \
     "$opt/bin/hyprpm" "$opt/share/bash-completion/completions/hyprpm" \
     "$opt/share/fish/vendor_completions.d/hyprpm.fish" "$opt/share/zsh/site-functions/_hyprpm"
