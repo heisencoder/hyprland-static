@@ -41,7 +41,7 @@ jobs:
 
       # Compare the static dependencies in Hyprland's actual link commands
       # with the declared list and the release notes (tests marked "build").
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
 
