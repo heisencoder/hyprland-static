@@ -3,7 +3,6 @@
 	url = https://github.com/hyprwm/Hyprland.git
 	shallow = true
 	ignore = dirty
-	branch = v0.56.2-b
 [submodule "src/hyprutils"]
 	path = src/hyprutils
 	url = https://github.com/hyprwm/hyprutils.git
