@@ -2,7 +2,8 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: hyprland-static
 Source: https://github.com/heisencoder/hyprland-static
 Comment: The build scripts are BSD-3-Clause (below).  The binaries bundle the
- projects listed after them, statically linked; their licenses follow.
+ projects listed after them, statically linked or (for the protocol
+ definitions) compiled in; their licenses follow.
 
 Files: *
 Copyright: 2026 the hyprland-static authors

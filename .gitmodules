@@ -3,7 +3,6 @@
 	url = https://github.com/hyprwm/Hyprland.git
 	shallow = true
 	ignore = dirty
-	branch = v0.56.2-b
 [submodule "src/hyprutils"]
 	path = src/hyprutils
 	url = https://github.com/hyprwm/hyprutils.git
@@ -47,5 +46,10 @@
 [submodule "src/wayland-protocols"]
 	path = src/wayland-protocols
 	url = https://gitlab.freedesktop.org/wayland/wayland-protocols.git
+	shallow = true
+	ignore = dirty
+[submodule "src/hyprland-protocols"]
+	path = src/hyprland-protocols
+	url = https://github.com/hyprwm/hyprland-protocols.git
 	shallow = true
 	ignore = dirty

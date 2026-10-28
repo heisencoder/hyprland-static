@@ -1,8 +1,8 @@
 """Move each submodule in src/ to its newest upstream release tag.
 
-Hyprland is updated first, because its CMakeLists limits the others: glaze
-must stay within the major versions Hyprland accepts (find_package(glaze
-7...<8)).
+Hyprland is updated first, because its CMakeLists can limit the others:
+glaze stays within the major versions Hyprland accepts when it names a range
+(find_package(glaze 7...<8) up to 0.56; 0.57 names none).
 
 Writes a PR title, a Markdown summary and a commit message into --out, and
 prints "changed=true" or "changed=false" (for $GITHUB_OUTPUT).  Refuses to

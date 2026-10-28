@@ -315,7 +315,6 @@ def test_collect(fake_root: Path, fake_tools: list[tuple[str, ...]]) -> None:
     assert notes.version_output.startswith("Hyprland 0.56.2")
     assert [r.split(" | ")[0] for r in notes.ubuntu_rows] == ["| `glslang-dev`", "| `liblcms2-dev`"]
     assert notes.compiled_in_rows == [
-        "| `hyprland-protocols` | hyprland-protocols-version | Hyprland protocol definitions |",
         "| `libwayland-dev` | libwayland-dev-version | core Wayland protocol definitions |",
     ]
     # Empty archives are never looked up.

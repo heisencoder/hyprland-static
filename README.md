@@ -30,6 +30,11 @@ The session launcher puts `/opt/hyprland-static/bin` first in `PATH`, so
 Not included: `hyprpm` and the plugin headers.  Plugins expect a dynamically
 linked Hyprland.
 
+Since 0.57, Hyprland reads only `~/.config/hypr/hyprland.lua`, not
+`hyprland.conf`, and writes a default `hyprland.lua` if there's none.
+Ubuntu's Hyprland (0.53) still reads `hyprland.conf`, so keep both files if
+you use both sessions.
+
 ## Building
 
     sudo apt install $(cat build-deps.txt)
@@ -57,12 +62,14 @@ C++ runtime (`libstdc++6`, installed everywhere) already comes from the same
 GCC 16 build.
 
 `--version` also names the branch Hyprland was built from.  `.gitmodules`
-records upstream's release branch for the pinned commit (e.g. `v0.56.2-b`),
-and `build.sh` checks the commit out on a local branch of that name.
+records upstream's release branch for the pinned commit, and `build.sh`
+checks the commit out on a local branch of that name.
 `scripts/update_deps.py` sets it only when exactly one upstream branch
 (other than the default branch) points at that commit, and removes it
 otherwise; the name is never derived from the version.  Without it, the
-branch in `--version` is empty.
+branch in `--version` is empty.  Upstream makes such branches (`vX.Y.Z-b`)
+for point releases, such as `v0.56.2-b` for 0.56.2; a `.0` release like
+0.57.0 has none.
 
 ### Workarounds in build.sh
 
@@ -79,23 +86,42 @@ list them too.
   `wl_*_interface` / `xdg_*_interface` from the same XML.  build.sh makes
   aquamarine's copies local with objcopy (with shared libraries, Hyprland's
   copies win at runtime anyway).
+- **systemd user unit:** Hyprland 0.57 runs `systemctl --user start
+  hyprland-session.target` when it starts (`HYPRLAND_NO_SD_TARGET=1` turns
+  this off), and installs the unit in `${CMAKE_INSTALL_LIBDIR}/systemd/user`.
+  That reaches systemd's search path only where LIBDIR is plain `lib` under
+  `/usr`, as on Arch.  On Ubuntu a `/usr` build puts it in
+  `/usr/lib/x86_64-linux-gnu/systemd/user`, and this build in
+  `/opt/hyprland-static/lib/systemd/user`; systemd searches neither.
+  build.sh moves it to `/usr/lib/systemd/user`.  Ubuntu 26.04's hyprland
+  package doesn't ship one, so they don't conflict.
+
+hyprland-protocols is built from `src/` too: Hyprland needs a newer one
+than Ubuntu 26.04's (0.7.0).
 
 ## Tests
 
 `./build.sh` runs:
 
-- the libraries' own unit tests and Hyprland's unit tests, each in a
-  separate Debug build (their test builds add sanitizers and coverage
-  instrumentation that the release build mustn't have);
-- checks on the staged binaries: version and release tag, `clean` source,
-  the release branch (if recorded), no dynamically linked Hyprland
-  libraries, nothing missing, and `Hyprland --verify-config` on
-  `packaging/test.conf`.
+- unit tests (unless `WITH_TESTS=0`), each project in a separate Debug
+  build (their test builds add sanitizers and coverage instrumentation that
+  the release build mustn't have): hyprutils, hyprlang, hyprwire,
+  hyprgraphics and aquamarine's own tests, and Hyprland's
+  `hyprland_gtests`;
+- checks on the staged binaries: `Hyprland --version` reports the pinned
+  version and release tag, `clean` source and, if `.gitmodules` records
+  one, the release branch; `Hyprland`, `hyprctl`, `start-hyprland` and
+  `hyprland-static-session` are installed; the first three link no
+  Hyprland library dynamically and have no unresolved shared libraries; and
+  `Hyprland --verify-config` accepts `packaging/test.lua`.
 
-Skipped, because build machines lack what they need: Hyprland's full
-compositor tests (`hyprtester`, a GPU), hyprcursor's tests (an installed
-hyprcursor theme) and aquamarine's `simpleWindow` (a running Wayland
-compositor).
+Not run, because build machines lack what they need:
+
+- hyprcursor's tests (an installed hyprcursor theme);
+- aquamarine's `simpleWindow` test (a running Wayland compositor);
+- Hyprland's compositor tests, `hyprtester` (a GPU; not built).
+
+glaze's and hyprwayland-scanner's tests aren't built either.
 
 ## Dependency updates
 
@@ -104,8 +130,10 @@ Actions tab).  It runs `scripts/update_deps.py`, which moves each submodule
 in `src/` to its newest upstream release tag:
 
 - Hyprland first, then the rest;
-- glaze only within the major versions the new Hyprland accepts
-  (`find_package(glaze 7...<8)` in its CMakeLists);
+- glaze within the major versions the new Hyprland's CMakeLists accepts,
+  when it gives a range (0.56 had `find_package(glaze 7...<8)`).  0.57's
+  `find_package(glaze QUIET)` gives none, so glaze moves to its newest
+  release (Hyprland's own fallback download is v7.2.0);
 - wayland-protocols from freedesktop's GitLab, the rest from GitHub.
 
 If anything changed, it pushes the branch `deps/update`, opens (or
@@ -136,10 +164,10 @@ To update by hand instead, on a clean checkout:
 
 Release by pushing a tag:
 
-    scripts/next-release.sh          # prints the next tag, e.g. "v0.56.2-3 3"
+    scripts/next-release.sh          # prints the next tag, e.g. "v0.57.0-2 2"
     git fetch origin
-    git tag v0.56.2-3 origin/main
-    git push origin v0.56.2-3
+    git tag v0.57.0-2 origin/main
+    git push origin v0.57.0-2
 
 `.github/workflows/release.yml` then builds and tests the `.deb` and
 publishes a GitHub **pre-release** with it attached.
@@ -168,8 +196,8 @@ The tag must be the Hyprland submodule's version, optionally followed by
 
 | Tag | Package version |
 |---|---|
-| `v0.56.2` | `0.56.2-1` |
-| `v0.56.2-2` | `0.56.2-2` |
+| `v0.57.0` | `0.57.0-1` |
+| `v0.57.0-2` | `0.57.0-2` |
 
 Use `-N` for packaging, build or library updates with the same Hyprland
 version.
@@ -183,8 +211,8 @@ in; run it from a clone of this repo):
     scripts/install-ci-build.sh 12      # PR #12
     scripts/install-ci-build.sh main
 
-CI packages are versioned just below the next release, e.g. `0.56.2-3~ci57`
-before `v0.56.2-3`.  Installing one upgrades from the last release, and the
+CI packages are versioned just below the next release, e.g. `0.57.0-2~ci57`
+before `v0.57.0-2`.  Installing one upgrades from the last release, and the
 release replaces it when you install that.
 
 ## Python scripts and tests
@@ -216,7 +244,9 @@ and ccache.  Both are saved even when the build fails.
 
 ## License
 
-The build scripts are BSD-3-Clause (see `LICENSE`).  The package bundles the
-projects in `src/` under their own licenses (BSD-3-Clause for the Hyprland
-projects, MIT for glaze); the package's
+The build scripts are BSD-3-Clause (see `LICENSE`).  The package bundles
+Hyprland, hyprutils, hyprlang, hyprwire, hyprgraphics, hyprcursor,
+aquamarine and glaze, plus code generated from hyprland-protocols and
+wayland-protocols, under their own licenses (BSD-3-Clause for the Hyprland
+projects, MIT for glaze and wayland-protocols); the package's
 `/usr/share/doc/hyprland-static/copyright` includes them all.

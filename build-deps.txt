@@ -10,8 +10,8 @@ git
 glslang-dev
 glslang-tools
 hwdata
-hyprland-protocols
 libcairo2-dev
+libcanberra-dev
 libdisplay-info-dev
 libdrm-dev
 libegl-dev
@@ -37,6 +37,7 @@ libpugixml-dev
 libre2-dev
 libreadline-dev
 librsvg2-dev
+libsdbus-c++-dev
 libseat-dev
 libspng-dev
 libssl-dev

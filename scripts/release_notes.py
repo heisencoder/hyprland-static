@@ -65,12 +65,14 @@ HOW = {
     "aquamarine": "static library",
     "glaze": "header-only library, compiled in",
     "wayland-protocols": "protocol definitions, compiled in",
+    "hyprland-protocols": "protocol definitions, compiled in",
     "hyprwayland-scanner": "code generator for the protocols (build tool)",
 }
 COMPILED_INTO = {
     "Hyprland": ["Hyprland", "hyprctl", "start-hyprland"],
     "glaze": ["Hyprland", "start-hyprland"],
     "wayland-protocols": ["Hyprland"],
+    "hyprland-protocols": ["Hyprland"],
     "hyprwayland-scanner": [],
 }
 
@@ -82,11 +84,12 @@ BUILD_ADJUSTMENTS = [
     "so they don't collide with Hyprland's identical ones",
     "wayland-protocols: optional C enum headers generated without `--strict`, "
     "which Ubuntu 26.04's wayland-scanner rejects for some newer files",
+    "Hyprland: its systemd user unit (`hyprland-session.target`) installed in "
+    "`/usr/lib/systemd/user`, where systemd finds it, instead of under `/opt/hyprland-static`",
 ]
 
 # Ubuntu packages whose files are compiled into Hyprland at build time.
 UBUNTU_COMPILED_IN = {
-    "hyprland-protocols": "Hyprland protocol definitions",
     "libwayland-dev": "core Wayland protocol definitions",
 }
 
