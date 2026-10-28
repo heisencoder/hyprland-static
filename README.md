@@ -111,8 +111,8 @@ in `src/` to its newest upstream release tag:
 If anything changed, it pushes the branch `deps/update`, opens (or
 refreshes) a pull request listing the new versions and the next release tag,
 asks `heisencoder` to review it (and assigns it to them), and approves the
-PR's CI and Python checks, which otherwise wait for approval because the
-workflow opened the PR.  Nothing is merged or released automatically.
+PR's CI, Python and CodeQL checks, which otherwise wait for approval because
+the workflow opened the PR.  Nothing is merged or released automatically.
 Opening the PR needs the repository setting "Allow GitHub Actions to create
 and approve pull requests" (Settings > Actions > General > Workflow
 permissions).
@@ -213,6 +213,14 @@ build:
 requests, on GitHub's `ubuntu-26.04` runner, and uploads the `.deb` as an
 artifact.  Caches: the build-tool `.deb` files (keyed on `build-deps.txt`)
 and ccache.  Both are saved even when the build fails.
+
+`.github/workflows/codeql.yml` runs CodeQL code scanning of the Python
+scripts and the workflows (the **Analyze (python)** and **Analyze
+(actions)** status checks) on pull requests, pushes to `main` and weekly.
+It's a workflow rather than CodeQL's "default setup" because default setup
+skips Dependabot's pull requests, leaving their required checks missing.
+Default setup must stay off: while it's on, GitHub refuses the workflow's
+results.
 
 ## License
 
