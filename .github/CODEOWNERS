@@ -1,0 +1,3 @@
+# GitHub asks the code owners to review every pull request when it's opened
+# (including Dependabot's), which also emails them.
+* @heisencoder
