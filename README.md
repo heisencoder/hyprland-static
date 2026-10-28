@@ -79,9 +79,13 @@ list them too.
   `wl_*_interface` / `xdg_*_interface` from the same XML.  build.sh makes
   aquamarine's copies local with objcopy (with shared libraries, Hyprland's
   copies win at runtime anyway).
-- **systemd user unit:** Hyprland starts `hyprland-session.target` when it
-  starts, but installs it under its prefix
-  (`/opt/hyprland-static/lib/systemd/user`), where systemd doesn't look.
+- **systemd user unit:** Hyprland 0.57 runs `systemctl --user start
+  hyprland-session.target` when it starts (`HYPRLAND_NO_SD_TARGET=1` turns
+  this off), and installs the unit in `${CMAKE_INSTALL_LIBDIR}/systemd/user`.
+  That reaches systemd's search path only where LIBDIR is plain `lib` under
+  `/usr`, as on Arch.  On Ubuntu a `/usr` build puts it in
+  `/usr/lib/x86_64-linux-gnu/systemd/user`, and this build in
+  `/opt/hyprland-static/lib/systemd/user`; systemd searches neither.
   build.sh moves it to `/usr/lib/systemd/user`.  Ubuntu 26.04's hyprland
   package doesn't ship one, so they don't conflict.
 
