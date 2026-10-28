@@ -225,7 +225,7 @@ step_extras() {
   if [ -d "$opt/lib/systemd" ]; then
     mkdir -p "$STAGE/usr/lib"
     mv "$opt/lib/systemd" "$STAGE/usr/lib/systemd"
-    rmdir --ignore-fail-on-non-empty "$opt/lib"
+    rmdir "$opt/lib"
   fi
   rm -rf "$opt/include" "$opt/share/pkgconfig" "$opt/share/wayland-sessions" \
     "$opt/bin/hyprpm" "$opt/share/bash-completion/completions/hyprpm" \
