@@ -246,6 +246,7 @@ and ccache.  Both are saved even when the build fails.
 
 The build scripts are BSD-3-Clause (see `LICENSE`).  The package bundles
 Hyprland, hyprutils, hyprlang, hyprwire, hyprgraphics, hyprcursor,
-aquamarine and glaze under their own licenses (BSD-3-Clause for the Hyprland
-projects, MIT for glaze); the package's
+aquamarine and glaze, plus code generated from hyprland-protocols and
+wayland-protocols, under their own licenses (BSD-3-Clause for the Hyprland
+projects, MIT for glaze and wayland-protocols); the package's
 `/usr/share/doc/hyprland-static/copyright` includes them all.

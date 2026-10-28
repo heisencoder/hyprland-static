@@ -294,11 +294,15 @@ step_package() {
   cp -a "$STAGE" "$pkg"
 
   install -D -m 644 "$TOP/packaging/copyright" "$pkg/usr/share/doc/$NAME/copyright"
-  local p
-  for p in Hyprland hyprutils hyprlang hyprwire hyprgraphics hyprcursor aquamarine glaze; do
+  # The protocol projects are compiled in as code generated from their XML.
+  local p licenses
+  for p in Hyprland hyprutils hyprlang hyprwire hyprgraphics hyprcursor aquamarine glaze \
+    hyprland-protocols wayland-protocols; do
+    licenses=$(find "$SRC/$p" -maxdepth 1 -type f \( -name 'LICENSE*' -o -name 'COPYING*' \) | sort)
+    [ -n "$licenses" ] || { echo "$p: no LICENSE or COPYING file" >&2; return 1; }
     {
       printf '\nFiles: bundled %s (commit %s)\n' "$p" "$(git -C "$SRC/$p" rev-parse --short=12 HEAD)"
-      sed 's/^$/./; s/^/ /' "$SRC"/$p/LICENSE*
+      sed 's/^$/./; s/^/ /' $licenses
     } >> "$pkg/usr/share/doc/$NAME/copyright"
   done
 
