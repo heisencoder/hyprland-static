@@ -56,12 +56,18 @@ make_static() {
   sed -i -E 's/add_library\(([a-z]+) SHARED/add_library(\1 STATIC/' "$SRC/$1/CMakeLists.txt"
 }
 
-# Their .pc files don't list their own dependencies (fine for shared
-# libraries, not for static ones), so add them.
+# Their .pc files don't list all their own dependencies (fine for shared
+# libraries, not for static ones), so add them.  Some list only their public
+# ones in Requires and the rest in Requires.private, which pkg-config ignores
+# without --static, so append to an existing Requires line.
 add_requires() {
   local pc=$DEPS/lib/pkgconfig/$1.pc
   shift
-  grep -q '^Requires:' "$pc" || echo "Requires: $*" >> "$pc"
+  if grep -q '^Requires:' "$pc"; then
+    sed -i "s/^Requires:.*/& $*/" "$pc"
+  else
+    echo "Requires: $*" >> "$pc"
+  fi
 }
 
 cmake_lib() {
