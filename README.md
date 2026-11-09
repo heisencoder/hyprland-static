@@ -107,7 +107,7 @@ than Ubuntu 26.04's (0.7.0).
   build (their test builds add sanitizers and coverage instrumentation that
   the release build mustn't have): hyprutils, hyprlang, hyprwire,
   hyprgraphics and aquamarine's own tests, and Hyprland's
-  `hyprland_gtests`;
+  `hyprland_gtests` and `start-hyprland` termination tests;
 - checks on the staged binaries: `Hyprland --version` reports the pinned
   version and release tag, `clean` source and, if `.gitmodules` records
   one, the release branch; `Hyprland`, `hyprctl`, `start-hyprland` and
