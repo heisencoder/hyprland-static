@@ -254,10 +254,11 @@ step_test_libs() {
   CTEST_EXCLUDE=simpleWindow cmake_test aquamarine
 }
 
-# Hyprland's own unit tests (hyprland_gtests).  Its full compositor tests
-# (hyprtester) need a GPU, so they aren't built.
+# Hyprland's own unit tests: upstream's `tests` target builds what ctest runs
+# (hyprland_gtests, and start-hyprland for its termination tests).  Its full
+# compositor tests (hyprtester) need a GPU, so they aren't built.
 step_test_hyprland() {
-  TEST_TARGET=hyprland_gtests cmake_test Hyprland
+  TEST_TARGET=tests cmake_test Hyprland
 }
 
 # Check the staged binaries: right version, no dynamic Hyprland libraries,
